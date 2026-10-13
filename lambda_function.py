@@ -37,7 +37,7 @@ def lambda_handler(event, context):
             SELECT *
             FROM (
                 SELECT DISTINCT session_id, question, answer, timestamp
-                FROM manekancor.conversation_history
+                FROM conversation_history
                 WHERE session_id = %s
                 ORDER BY timestamp DESC
                 LIMIT 5
@@ -48,7 +48,7 @@ def lambda_handler(event, context):
         if task == "last_chat":
             query = (
                 "SELECT DISTINCT session_id, question, answer, timestamp "
-                "FROM manekancor.conversation_history "
+                "FROM conversation_history "
                 "WHERE session_id = %s order by timestamp desc limit 1;"
             )
             value = (session_id,)
@@ -58,7 +58,7 @@ def lambda_handler(event, context):
                     question,
                     answer,
                     timestamp
-                FROM manekancor.conversation_history
+                FROM conversation_history
                 WHERE session_id = %s 
                 order by timestamp asc;"""
         
@@ -101,7 +101,7 @@ def lambda_handler(event, context):
 
         query ="""
             SELECT serial_no, session_id, conversation_start_time_stamp, conversation_end_time, user_name, status, file_name 
-            FROM manekancor.conversation_management
+            FROM conversation_management
             where user_name = %s
             ORDER BY conversation_start_time_stamp DESC LIMIT %s OFFSET %s;
             """
@@ -112,7 +112,7 @@ def lambda_handler(event, context):
         # total count (without pagination)
         count_query ="""
             SELECT COUNT(*)
-            FROM manekancor.conversation_management
+            FROM conversation_management
             where user_name = %s;
             """
         count_rows = db_result(count_query, (user_name,))
@@ -164,7 +164,7 @@ def lambda_handler(event, context):
             chat_history_query = (
                 """
                 SELECT question, answer
-                FROM manekancor.conversation_history
+                FROM conversation_history
                 WHERE session_id = %s
                 ORDER BY timestamp ASC;
                 """
@@ -201,7 +201,7 @@ def lambda_handler(event, context):
             else:
                 query = """
                 INSERT INTO
-                manekancor.conversation_management
+                conversation_management
                 (session_id, conversation_start_time_stamp, user_name)
                 values(%s, now(), %s);
                 """
@@ -212,7 +212,7 @@ def lambda_handler(event, context):
 
             chat_history += f"\n\nQuestion: {question}\nAnswer:"        
             update_conversation_query = """
-                INSERT INTO manekancor.conversation_history (session_id, chat_id, question, answer, timestamp, input_token, output_token, user_name)
+                INSERT INTO conversation_history (session_id, chat_id, question, answer, timestamp, input_token, output_token, user_name)
                 VALUES (%s, %s, %s, %s, now(), %s, %s, %s);
             """
             update_conversation_values = (session_id, chat_id, question, answer, input_token, output_token, user_name)
@@ -231,7 +231,7 @@ def lambda_handler(event, context):
             input_token = result.get("input_token", "")
             output_token = result.get("output_token", "")
             update_ocr_query = """
-                    UPDATE manekancor.conversation_history
+                    UPDATE conversation_history
                     SET answer = %s
                     WHERE session_id = %s and chat_id = %s;
                 """
@@ -260,7 +260,7 @@ def lambda_handler(event, context):
 
             status = 'failed'
             update_ocr_query = """
-                UPDATE manekancor.conversation_management
+                UPDATE conversation_management
                 SET status = %s
                 WHERE session_id = %s;
             """
