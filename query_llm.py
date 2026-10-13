@@ -12,7 +12,7 @@ secret_key = os.environ['secret_key']
 def get_prompt(task):
     query = f"""
         SELECT system_prompt, knowledgebase_id, model_id, model_arn
-        FROM "manekancor".prompt_manager
+        FROM prompt_manager
         WHERE task = '{task}';
     """
     query_info = db_result(query)[0]
@@ -155,7 +155,7 @@ def get_knowledge_base_response(conversation, session_id, connection_id, streame
         # Step 2: Get KB session ID (if exists)
         query = f"""
             SELECT kb_session_id
-            FROM "manekancor".conversation_management 
+            FROM conversation_management 
             WHERE session_id = '{session_id}';
         """
         kb_session_query = db_result(query)
@@ -191,7 +191,7 @@ def get_knowledge_base_response(conversation, session_id, connection_id, streame
         if "sessionId" in retrieve_response:
             new_kb_session_id = retrieve_response["sessionId"]
             query = """
-                UPDATE "manekancor".conversation_management
+                UPDATE conversation_management
                 SET kb_session_id = %s
                 WHERE session_id = %s;
             """
